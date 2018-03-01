@@ -40,7 +40,7 @@ public class BookConverter {
                 addImageAndStyles(document,content,note);
 
                 Element ol = document.createElement("ol");
-                ol.attr("duokan-footnote-content");
+                ol.attr("class","duokan-footnote-content");
                 for(FileNoteItem noteItem : note.getNotes()){
                     addImageNote(document,ol,content,note,noteItem);
                 }
@@ -69,17 +69,22 @@ public class BookConverter {
                 System.err.println("在文件"+file+"找到sup元素，但其父元素不存在或不是<a/>标签!");
                 continue;
             }
-            Element siblingLink = supParentLink.previousElementSibling();
-            if(siblingLink == null || !siblingLink.tagName().equalsIgnoreCase("a")){
-                System.err.println("在文件"+file+"找到sup元素，但其父元素兄弟节点不存在或不是<a/>标签!");
-                continue;
-            }
 
             FileNoteItem noteInfo = new FileNoteItem();
-            noteInfo.setNoteId(siblingLink.attr("id"));
-            noteInfo.setHref(supParentLink.attr("href"));
             noteInfo.setNoteText(sup.text());
             noteInfo.setNoteElement(supParentLink);
+            if(supParentLink.hasAttr("href") && supParentLink.hasAttr("id")){
+                noteInfo.setNoteId(supParentLink.attr("id"));
+                noteInfo.setHref(supParentLink.attr("href"));
+            }else{
+                Element siblingLink = supParentLink.previousElementSibling();
+                if(siblingLink == null || !siblingLink.tagName().equalsIgnoreCase("a")){
+                    System.err.println("在文件"+file+"找到sup元素，但其父元素兄弟不存在或不是<a/>标签!");
+                }
+                noteInfo.setHref(supParentLink.attr("href"));
+                noteInfo.setNoteId(siblingLink.attr("id"));
+            }
+
 
             String refId = noteInfo.getHref().split("#")[1];
             noteInfo.setReferenceId(refId);
@@ -92,11 +97,10 @@ public class BookConverter {
             }
             Element refNoteLink= refNote.nextElementSibling();
             if (refNoteLink == null || !refNoteLink.tagName().equalsIgnoreCase("a")) {
-                System.err.println("在文件"+file+"找到注释"+refId+"，但其兄弟节点不存在或不是<a/>标签!");
-                continue;
+                refNoteLink = null;
             }
             noteInfo.setReferenceText(refNotePara.text());
-            noteInfo.setReferenceHref(refNoteLink.attr("href"));
+            noteInfo.setReferenceHref(refNoteLink!=null?refNoteLink.attr("href"):refNote.attr("href"));
             noteInfo.setReferenceElement(refNotePara);
 
             notes.add(noteInfo);
@@ -124,14 +128,19 @@ public class BookConverter {
         img.attr("alt", "注释");
         img.attr("class", "duokan-footnote");
         if(content.getContentPath().equals(new File(note.getPath()).getParent())){
-            img.attr("src", "Images/note.png");
+            img.attr("src", "images/note.png");
         }else {
-            img.attr("src", "../Images/note.png");
+            img.attr("src", "../images/note.png");
         }
 
         Element noteElement = item.getNoteElement();
         noteElement.after(link);
-        noteElement.previousElementSibling().remove();
+        if(!noteElement.hasAttr("href") || !noteElement.hasAttr("id")){
+            Element siblingLink = noteElement.previousElementSibling();
+            if (siblingLink != null && siblingLink.tagName().equalsIgnoreCase("a")) {
+                siblingLink.remove();
+            }
+        }
         noteElement.remove();
 
         Element li = document.createElement("li");

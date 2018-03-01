@@ -7,6 +7,8 @@ import com.github.book.io.BookFileHandler;
 import com.github.book.meta.BookContentInfo;
 import org.apache.commons.lang.StringUtils;
 
+import java.io.File;
+
 public class BookResolverEntry {
 
     public static void main(String[] args) throws Exception {
@@ -19,15 +21,18 @@ public class BookResolverEntry {
         BookFileHandler reader = new BookFileHandler(args[0]);
         String dir = reader.read();
 
-        BookContentResolver bcr = new BookContentResolver(StringUtils.join(new String[]{
-                dir, Constants.FILE_CONTENT}));
+        String contentOpf = StringUtils.join(new String[]{dir,File.separator,
+                Constants.DIR_OEBPS,File.separator,"content.opf"});
+        if(!new File(contentOpf).exists()){
+            contentOpf = StringUtils.join(new String[]{dir,File.separator,"content.opf"});
+            if(!new File(contentOpf).exists())
+                throw new RuntimeException("opf文件不存在！");
+        }
+        BookContentResolver bcr = new BookContentResolver(contentOpf);
         BookContentInfo content = bcr.resolve();
 
         BookConverter converter = new BookConverter();
         converter.convert(content);
-
-
-
     }
 
 
