@@ -128,9 +128,9 @@ public class BookConverter {
         img.attr("alt", "注释");
         img.attr("class", "duokan-footnote");
         if(content.getContentPath().equals(new File(note.getPath()).getParent())){
-            img.attr("src", "images/note.png");
+            img.attr("src", "Images/note.png");
         }else {
-            img.attr("src", "../images/note.png");
+            img.attr("src", "../Images/note.png");
         }
 
         Element noteElement = item.getNoteElement();
