@@ -1,7 +1,6 @@
 package com.github.book.io;
 
-import com.github.book.common.Constants;
-import com.github.book.meta.BookContentInfo;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -31,6 +30,10 @@ public class BookFileHandler {
         ZipUtil.unzip(path, rootDir);
 
         return rootDir;
+
+    }
+
+    public void create(){
 
     }
 
