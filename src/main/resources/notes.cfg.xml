@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<notes>
+    <indices>
+        <index selector="sup" footnote="ft1">
+            <elements>
+                <element tag-name="sup" text="true"/>
+                <element tag-name="a" rel="parent" attr="href" remove="true"/>
+                <element tag-name="a" rel="prent.previousElementSibling" attr="id" remove="true"/>
+            </elements>
+        </index>
+        <index footnote="ft2">
+            <expression>
+                <![CDATA[
+                    <\\s*a\\s+(\\w+\\s*=\\s*\"(.*)\")*\\s*>\\s*[\\[【［（(]?\\s*\\d+\\s*[）)\\]］】]?\\s*</a>
+                ]]>
+            </expression>
+            <elements>
+                <element tag-name="a" attr="href,id" text="true"/>
+                <element tag-name="span" rel="parent" remove="true" />
+            </elements>
+        </index>
+    </indices>
+
+    <footnotes>
+         <footnote id="ft1">
+            <elements>
+                <element tag-name="a" attr="id"/>
+                <element tag-name="p" rel="parent" remove="true" text="true"/>
+                <element tag-name="a" rel="nextElementSibling" attr="href"/>
+            </elements>
+        </footnote>
+
+         <footnote id="ft2">
+            <elements>
+                <element tag-name="a" attr="id"/>
+                <element tag-name="p" rel="parent" remove="true" text="true"/>
+                <element tag-name="a" rel="nextElementSibling" attr="href"/>
+            </elements>
+        </footnote>
+    </footnotes>
+
+</notes>

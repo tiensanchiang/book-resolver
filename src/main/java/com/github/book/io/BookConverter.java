@@ -1,10 +1,7 @@
 package com.github.book.io;
 
 import com.github.book.common.Constants;
-import com.github.book.meta.BookContentInfo;
-import com.github.book.meta.FileNoteInfo;
-import com.github.book.meta.FileNoteItem;
-import com.github.book.meta.ManifestItem;
+import com.github.book.meta.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
@@ -12,17 +9,16 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import javax.print.Doc;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BookConverter {
 
-    public void convert(BookContentInfo content) throws IOException{
-        System.out.println("开始转换:"+content.getMetadata().getTitle());
+    public void convert(BookDescriptor descriptor) throws IOException{
 
-        for(ManifestItem item : content.getManifest()){
+        OpenPublicationFormat opf = descriptor.getOpf();
+        for(ManifestItem item : opf.getManifest()){
 
             if(!item.isHyperText()){
                 continue;
@@ -30,19 +26,19 @@ public class BookConverter {
 
             String href = item.getHref();
 
-            String path = StringUtils.join(new String[]{content.getContentPath(), File.separator,href});
+            String path = StringUtils.join(new String[]{"", File.separator,href});
 
             Document document = Jsoup.parse(new File(path), "utf-8");
             FileNoteInfo note = getNotes(document);
 
             if(note != null) {
                 System.out.println("文档" + path + "发现" + note.getNotes().size() + "个注释！");
-                addImageAndStyles(document,content,note);
+                addImageAndStyles(document,opf,note);
 
                 Element ol = document.createElement("ol");
                 ol.attr("class","duokan-footnote-content");
                 for(FileNoteItem noteItem : note.getNotes()){
-                    addImageNote(document,ol,content,note,noteItem);
+                    addImageNote(document,ol,opf,note,noteItem);
                 }
                 document.selectFirst("body").appendChild(ol);
 
@@ -116,7 +112,7 @@ public class BookConverter {
         }
     }
 
-    public void  addImageNote(Document document,Element ol,BookContentInfo content,FileNoteInfo note,FileNoteItem item){
+    public void  addImageNote(Document document, Element ol, OpenPublicationFormat content, FileNoteInfo note, FileNoteItem item){
         Element link = document.createElement("a");
         Element img = document.createElement("img");
         link.appendChild(img);
@@ -127,10 +123,10 @@ public class BookConverter {
 
         img.attr("alt", "注释");
         img.attr("class", "duokan-footnote");
-        if(content.getContentPath().equals(new File(note.getPath()).getParent())){
-            img.attr("src", "Images/note.png");
+        if("".equals(new File(note.getPath()).getParent())){
+            img.attr("src", "images/note.png");
         }else {
-            img.attr("src", "../Images/note.png");
+            img.attr("src", "../images/note.png");
         }
 
         Element noteElement = item.getNoteElement();
@@ -163,8 +159,8 @@ public class BookConverter {
         item.getReferenceElement().remove();
     }
 
-    public void addImageAndStyles(Document document,BookContentInfo content,FileNoteInfo note) {
-        String rootPath = content.getContentPath();
+    public void addImageAndStyles(Document document, OpenPublicationFormat content, FileNoteInfo note) {
+        String rootPath = content.getPath();
         File imagesPath = new File(StringUtils.join(new String[]{rootPath,File.separator, Constants.DIR_IMAGES}));
         if(!imagesPath.exists()){
             imagesPath.mkdirs();
